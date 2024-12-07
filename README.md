@@ -28,18 +28,18 @@ E-Shop is a complete e-commerce platform built to demonstrate a modern full-stac
 
 ## Installation and Setup  
 
-# Clone the repository
+### Clone the repository
 ```bash
 git clone https://github.com/Elattar98/E-Shop.git
 cd E-Shop
 ```
 
-# Install dependencies
+### Install dependencies
 ```bash
 npm install  
 dotnet restore  
 ```
-# Run the application
+### Run the application
 ```bash
 npm start  
 dotnet run  
