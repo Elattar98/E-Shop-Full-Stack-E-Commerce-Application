@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Work\\Searched Partition #1 (369142)\\(NTFS)653.46 GB\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj": {}
+    "F:\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj": {}
   },
   "projects": {
-    "F:\\Work\\Searched Partition #1 (369142)\\(NTFS)653.46 GB\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj": {
+    "F:\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Work\\Searched Partition #1 (369142)\\(NTFS)653.46 GB\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj",
+        "projectUniqueName": "F:\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj",
         "projectName": "API Project",
-        "projectPath": "F:\\Work\\Searched Partition #1 (369142)\\(NTFS)653.46 GB\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj",
+        "projectPath": "F:\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\API Project.csproj",
         "packagesPath": "C:\\Users\\MH\\.nuget\\packages\\",
-        "outputPath": "F:\\Work\\Searched Partition #1 (369142)\\(NTFS)653.46 GB\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\obj\\",
+        "outputPath": "F:\\Work\\API-Project\\API Project(ASP .Net Core)\\API Project\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\MH\\AppData\\Roaming\\NuGet\\NuGet.Config",
