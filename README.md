@@ -18,7 +18,7 @@ E-Shop is a complete e-commerce platform built to demonstrate a modern full-stac
 ### Front-End
 - Framework: Angular
 - Languages: HTML, CSS, JavaScript, TypeScript
-- UI Framework: Bootstrap / Material UI
+- UI Framework: Bootstrap
 ### Back-End
 - Framework: ASP.NET Core
 - API: RESTful API with secure endpoints
