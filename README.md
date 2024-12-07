@@ -20,9 +20,9 @@ E-Shop is a complete e-commerce platform built to demonstrate a modern full-stac
 - Languages: HTML, CSS, JavaScript, TypeScript
 - UI Framework: Bootstrap / Material UI
 ### Back-End
-- Framework: ASP.NET Core / Node.js (depending on your implementation)
+- Framework: ASP.NET Core
 - API: RESTful API with secure endpoints
-- Database: SQL Server / MongoDB
+- Database: SQL Server
 
 ---
 
@@ -46,7 +46,7 @@ Author: Abd Elrahman Elattar
 
 yaml
 Copy code
-
+```
 ---
 
 ## Project Structure
@@ -58,7 +58,7 @@ Copy code
   ├── docs/                 # Project documentation and API docs
   ├── README.md             # Project overview
   └── LICENSE               # License information
-
+```
 ---
 
 ### Contact
