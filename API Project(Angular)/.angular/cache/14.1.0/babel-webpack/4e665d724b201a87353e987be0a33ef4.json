@@ -1,0 +1,91 @@
+import { Subject, AnonymousSubject } from '../../Subject';
+import { Subscriber } from '../../Subscriber';
+import { Observable } from '../../Observable';
+import { Subscription } from '../../Subscription';
+import { ReplaySubject } from '../../ReplaySubject';
+const DEFAULT_WEBSOCKET_CONFIG = {
+    url: '',
+    deserializer: (e) => JSON.parse(e.data),
+    serializer: (value) => JSON.stringify(value),
+};
+const WEBSOCKETSUBJECT_INVALID_ERROR_OBJECT = 'WebSocketSubject.error must be called with an object with an error code, and an optional reason: { code: number, reason: string }';
+export class WebSocketSubject extends AnonymousSubject {
+    constructor(urlConfigOrSource, destination) {
+        super();
+        this._socket = null;
+        if (urlConfigOrSource instanceof Observable) {
+            this.destination = destination;
+            this.source = urlConfigOrSource;
+        }
+        else {
+            const config = (this._config = Object.assign({}, DEFAULT_WEBSOCKET_CONFIG));
+            this._output = new Subject();
+            if (typeof urlConfigOrSource === 'string') {
+                config.url = urlConfigOrSource;
+            }
+            else {
+                for (const key in urlConfigOrSource) {
+                    if (urlConfigOrSource.hasOwnProperty(key)) {
+                        config[key] = urlConfigOrSource[key];
+                    }
+                }
+            }
+            if (!config.WebSocketCtor && WebSocket) {
+                config.WebSocketCtor = WebSocket;
+            }
+            else if (!config.WebSocketCtor) {
+                throw new Error('no WebSocket constructor can be found');
+            }
+            this.destination = new ReplaySubject();
+        }
+    }
+    lift(operator) {
+        const sock = new WebSocketSubject(this._config, this.destination);
+        sock.operator = operator;
+        sock.source = this;
+        return sock;
+    }
+    _resetState() {
+        this._socket = null;
+        if (!this.source) {
+            this.destination = new ReplaySubject();
+        }
+        this._output = new Subject();
+    }
+    multiplex(subMsg, unsubMsg, messageFilter) {
+        const self = this;
+        return new Observable((observer) => {
+            try {
+                self.next(subMsg());
+            }
+            catch (err) {
+                observer.error(err);
+            }
+            const subscription = self.subscribe({
+                next: (x) => {
+                    try {
+                        if (messageFilter(x)) {
+                            observer.next(x);
+                        }
+                    }
+                    catch (err) {
+                        observer.error(err);
+                    }
+                },
+                error: (err) => observer.error(err),
+                complete: () => observer.complete(),
+            });
+            return () => {
+                try {
+                    self.next(unsubMsg());
+                }
+                catch (err) {
+                    observer.error(err);
+                }
+                subscription.unsubscribe();
+            };
+        });
+    }
+    _connectSocket() {
+        const { WebSocketCtor, protocol, url, binaryType } = this._config;
+        const ob

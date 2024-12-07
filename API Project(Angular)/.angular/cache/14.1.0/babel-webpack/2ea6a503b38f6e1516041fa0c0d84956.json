@@ -1,0 +1,40 @@
+/// <reference lib="esnext.asynciterable" />
+import { Observable } from './Observable';
+import { Subscription } from './Subscription';
+/**
+ * Note: This will add Symbol.observable globally for all TypeScript users,
+ * however, we are no longer polyfilling Symbol.observable
+ */
+declare global {
+    interface SymbolConstructor {
+        readonly observable: symbol;
+    }
+}
+/** OPERATOR INTERFACES */
+export interface UnaryFunction<T, R> {
+    (source: T): R;
+}
+export interface OperatorFunction<T, R> extends UnaryFunction<Observable<T>, Observable<R>> {
+}
+export declare type FactoryOrValue<T> = T | (() => T);
+export interface MonoTypeOperatorFunction<T> extends OperatorFunction<T, T> {
+}
+/**
+ * A value and the time at which it was emitted.
+ *
+ * Emitted by the `timestamp` operator
+ *
+ * @see {@link timestamp}
+ */
+export interface Timestamp<T> {
+    value: T;
+    /**
+     * The timestamp. By default, this is in epoch milliseconds.
+     * Could vary based on the timestamp provider passed to the operator.
+     */
+    timestamp: number;
+}
+/**
+ * A value emitted and the amount of time since the last value was emitted.
+ *
+ * Emitted by the `tim

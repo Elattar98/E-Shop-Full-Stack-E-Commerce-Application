@@ -1,0 +1,14 @@
+signature outlined in {@link ObservableNotification}.
+     * For example: `{ kind: 'N', value: 1 }`, `{ kind: 'E', error: new Error('bad') }`, or `{ kind: 'C' }`.
+     * Will be removed in v8.
+     */
+    static createComplete(): Notification<never> & CompleteNotification;
+}
+/**
+ * Executes the appropriate handler on a passed `observer` given the `kind` of notification.
+ * If the handler is missing it will do nothing. Even if the notification is an error, if
+ * there is no error handler on the observer, an error will not be thrown, it will noop.
+ * @param notification The notification object to observe.
+ * @param observer The observer to notify.
+ */
+export declare function observeN

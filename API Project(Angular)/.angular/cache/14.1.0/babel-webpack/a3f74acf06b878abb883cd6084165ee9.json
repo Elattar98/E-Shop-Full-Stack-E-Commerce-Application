@@ -1,0 +1,88 @@
+import { __assign } from "tslib";
+import { map } from '../operators/map';
+import { Observable } from '../Observable';
+import { AjaxResponse } from './AjaxResponse';
+import { AjaxTimeoutError, AjaxError } from './errors';
+function ajaxGet(url, headers) {
+    return ajax({ method: 'GET', url: url, headers: headers });
+}
+function ajaxPost(url, body, headers) {
+    return ajax({ method: 'POST', url: url, body: body, headers: headers });
+}
+function ajaxDelete(url, headers) {
+    return ajax({ method: 'DELETE', url: url, headers: headers });
+}
+function ajaxPut(url, body, headers) {
+    return ajax({ method: 'PUT', url: url, body: body, headers: headers });
+}
+function ajaxPatch(url, body, headers) {
+    return ajax({ method: 'PATCH', url: url, body: body, headers: headers });
+}
+var mapResponse = map(function (x) { return x.response; });
+function ajaxGetJSON(url, headers) {
+    return mapResponse(ajax({
+        method: 'GET',
+        url: url,
+        headers: headers,
+    }));
+}
+export var ajax = (function () {
+    var create = function (urlOrConfig) {
+        var config = typeof urlOrConfig === 'string'
+            ? {
+                url: urlOrConfig,
+            }
+            : urlOrConfig;
+        return fromAjax(config);
+    };
+    create.get = ajaxGet;
+    create.post = ajaxPost;
+    create.delete = ajaxDelete;
+    create.put = ajaxPut;
+    create.patch = ajaxPatch;
+    create.getJSON = ajaxGetJSON;
+    return create;
+})();
+var UPLOAD = 'upload';
+var DOWNLOAD = 'download';
+var LOADSTART = 'loadstart';
+var PROGRESS = 'progress';
+var LOAD = 'load';
+export function fromAjax(init) {
+    return new Observable(function (destination) {
+        var _a, _b;
+        var config = __assign({ async: true, crossDomain: false, withCredentials: false, method: 'GET', timeout: 0, responseType: 'json' }, init);
+        var queryParams = config.queryParams, configuredBody = config.body, configuredHeaders = config.headers;
+        var url = config.url;
+        if (!url) {
+            throw new TypeError('url is required');
+        }
+        if (queryParams) {
+            var searchParams_1;
+            if (url.includes('?')) {
+                var parts = url.split('?');
+                if (2 < parts.length) {
+                    throw new TypeError('invalid url');
+                }
+                searchParams_1 = new URLSearchParams(parts[1]);
+                new URLSearchParams(queryParams).forEach(function (value, key) { return searchParams_1.set(key, value); });
+                url = parts[0] + '?' + searchParams_1;
+            }
+            else {
+                searchParams_1 = new URLSearchParams(queryParams);
+                url = url + '?' + searchParams_1;
+            }
+        }
+        var headers = {};
+        if (configuredHeaders) {
+            for (var key in configuredHeaders) {
+                if (configuredHeaders.hasOwnProperty(key)) {
+                    headers[key.toLowerCase()] = configuredHeaders[key];
+                }
+            }
+        }
+        var crossDomain = config.crossDomain;
+        if (!crossDomain && !('x-requested-with' in headers)) {
+            headers['x-requested-with'] = 'XMLHttpRequest';
+        }
+       

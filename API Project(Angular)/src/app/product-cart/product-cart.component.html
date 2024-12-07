@@ -1,0 +1,7 @@
+
+<ol class="list-group list-group-numbered">
+  <li class="list-group-item d-flex"
+  *ngFor="let item of loadedItems">{{item.product.productTitle}} - Price: {{item.product.productPrice}} - Product Quantity: {{item.itemQuantity}} - TotalCost: {{item.itemTotalCost}}
+  <button type="button" name="button" class="btn btn-danger ms-auto" (click) = "onRemoveItem(item.itemId)">Remove Item</button>
+  </li>
+</ol>

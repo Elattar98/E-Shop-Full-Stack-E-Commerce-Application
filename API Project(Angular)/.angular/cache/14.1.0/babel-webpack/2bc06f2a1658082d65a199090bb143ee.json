@@ -1,0 +1,24 @@
+ not and cannot be typed via TypeScript. See
+ * comments here: https://github.com/microsoft/TypeScript/issues/28682#issuecomment-707142417
+ */
+export declare type Falsy = null | undefined | false | 0 | -0 | 0n | '';
+export declare type TruthyTypesOf<T> = T extends Falsy ? never : T;
+interface ReadableStreamDefaultReaderLike<T> {
+    read(): PromiseLike<{
+        done: false;
+        value: T;
+    } | {
+        done: true;
+        value?: undefined;
+    }>;
+    releaseLock(): void;
+}
+/**
+ * The base signature RxJS will look for to identify and use
+ * a [ReadableStream](https://streams.spec.whatwg.org/#rs-class)
+ * as an {@link ObservableInput} source.
+ */
+export interface ReadableStreamLike<T> {
+    getReader(): ReadableStreamDefaultReaderLike<T>;
+}
+/**

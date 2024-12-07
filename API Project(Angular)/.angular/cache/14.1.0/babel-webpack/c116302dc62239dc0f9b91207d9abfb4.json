@@ -1,0 +1,26 @@
+(openObserver) {
+                openObserver.next(evt);
+            }
+            const queue = this.destination;
+            this.destination = Subscriber.create((x) => {
+                if (socket.readyState === 1) {
+                    try {
+                        const { serializer } = this._config;
+                        socket.send(serializer(x));
+                    }
+                    catch (e) {
+                        this.destination.error(e);
+                    }
+                }
+            }, (err) => {
+                const { closingObserver } = this._config;
+                if (closingObserver) {
+                    closingObserver.next(undefined);
+                }
+                if (err && err.code) {
+                    socket.close(err.code, err.reason);
+                }
+                else {
+                    observer.error(new TypeError(WEBSOCKETSUBJECT_INVALID_ERROR_OBJECT));
+                }
+                this._

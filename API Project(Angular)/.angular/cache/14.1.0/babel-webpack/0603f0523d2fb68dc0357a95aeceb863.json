@@ -1,0 +1,40 @@
+import { Observable } from '../Observable';
+import { ObservableInput, ObservableInputTuple, SchedulerLike } from '../types';
+import { mergeAll } from '../operators/mergeAll';
+import { innerFrom } from './innerFrom';
+import { EMPTY } from './empty';
+import { popNumber, popScheduler } from '../util/args';
+import { from } from './from';
+
+export function merge<A extends readonly unknown[]>(...sources: [...ObservableInputTuple<A>]): Observable<A[number]>;
+export function merge<A extends readonly unknown[]>(...sourcesAndConcurrency: [...ObservableInputTuple<A>, number?]): Observable<A[number]>;
+/** @deprecated The `scheduler` parameter will be removed in v8. Use `scheduled` and `mergeAll`. Details: https://rxjs.dev/deprecations/scheduler-argument */
+export function merge<A extends readonly unknown[]>(
+  ...sourcesAndScheduler: [...ObservableInputTuple<A>, SchedulerLike?]
+): Observable<A[number]>;
+/** @deprecated The `scheduler` parameter will be removed in v8. Use `scheduled` and `mergeAll`. Details: https://rxjs.dev/deprecations/scheduler-argument */
+export function merge<A extends readonly unknown[]>(
+  ...sourcesAndConcurrencyAndScheduler: [...ObservableInputTuple<A>, number?, SchedulerLike?]
+): Observable<A[number]>;
+
+/**
+ * Creates an output Observable which concurrently emits all values from every
+ * given input Observable.
+ *
+ * <span class="informal">Flattens multiple Observables together by blending
+ * their values into one Observable.</span>
+ *
+ * ![](merge.png)
+ *
+ * `merge` subscribes to each given input Observable (as arguments), and simply
+ * forwards (without doing any transformation) all the values from all the input
+ * Observables to the output Observable. The output Observable only completes
+ * once all input Observables have completed. Any error delivered by an input
+ * Observable will be immediately emitted on the output Observable.
+ *
+ * ## Examples
+ *
+ * Merge together two Observables: 1s interval and clicks
+ *
+ * ```ts
+ * import { merge

@@ -1,0 +1,24 @@
+import { Observable } from '../Observable';
+import { SchedulerLike } from '../types';
+/**
+ * Creates an Observable that emits no items to the Observer and immediately
+ * emits an error notification.
+ *
+ * <span class="informal">Just emits 'error', and nothing else.
+ * </span>
+ *
+ * ![](throw.png)
+ *
+ * This static operator is useful for creating a simple Observable that only
+ * emits the error notification. It can be used for composing with other
+ * Observables, such as in a {@link mergeMap}.
+ *
+ * ## Examples
+ * ### Emit the number 7, then emit an error
+ * ```ts
+ * import { throwError, concat, of } from 'rxjs';
+ *
+ * const result = concat(of(7), throwError(new Error('oops!')));
+ * result.subscribe(x => console.log(x), e => console.error(e));
+ *
+ * // Logs:

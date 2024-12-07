@@ -1,0 +1,6 @@
+x];
+            if (isViewProvider && !doesViewProvidersFactoryExist ||
+                !isViewProvider && !doesProvidersFactoryExist) {
+                // Cases 1.a and 2.a
+                diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, token);
+                const factory = multiFactory(isViewProvider ? multiViewProvidersFactoryResolver : multiProvidersFactoryResolver, lInjectablesBlueprint.length, isViewProvider, isC

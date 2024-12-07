@@ -1,0 +1,16 @@
+sed to the `body` argument, it is automatically serialized
+     * based on the specified `responseType`. By default, a JavaScript object will be serialized
+     * to JSON. A `responseType` of `application/x-www-form-urlencoded` will flatten any provided
+     * dictionary object to a url-encoded string.
+     *
+     * @param url The URL to get the resource from
+     * @param body The content to send. The body is automatically serialized.
+     * @param headers Optional headers. Case-Insensitive.
+     */
+    patch<T>(url: string, body?: any, headers?: Record<string, string>): Observable<AjaxResponse<T>>;
+    /**
+     * Performs an HTTP DELETE using the
+     * [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) in
+     * global scope by default, and a `responseType` of `"json"`.
+     *
+     * @p

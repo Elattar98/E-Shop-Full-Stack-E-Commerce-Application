@@ -1,0 +1,44 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.nodes = void 0;
+
+var _t = require("@babel/types");
+
+const {
+  FLIPPED_ALIAS_KEYS,
+  isArrayExpression,
+  isAssignmentExpression,
+  isBinary,
+  isBlockStatement,
+  isCallExpression,
+  isFunction,
+  isIdentifier,
+  isLiteral,
+  isMemberExpression,
+  isObjectExpression,
+  isOptionalCallExpression,
+  isOptionalMemberExpression,
+  isStringLiteral
+} = _t;
+var WhitespaceFlag = {
+  before: 1,
+  after: 2
+};
+
+function crawlInternal(node, state) {
+  if (!node) return state;
+
+  if (isMemberExpression(node) || isOptionalMemberExpression(node)) {
+    crawlInternal(node.object, state);
+    if (node.computed) crawlInternal(node.property, state);
+  } else if (isBinary(node) || isAssignmentExpression(node)) {
+    crawlInternal(node.left, state);
+    crawlInternal(node.right, state);
+  } else if (isCallExpression(node) || isOptionalCallExpression(node)) {
+    state.hasCall = true;
+    crawlInternal(node.callee, state);
+  } else if (isFunction(node)) {
+    st

@@ -1,0 +1,80 @@
+import { PartialObserver } from '../types';
+
+/**
+ * Valid Ajax direction types. Prefixes the event `type` in the
+ * {@link AjaxResponse} object with "upload_" for events related
+ * to uploading and "download_" for events related to downloading.
+ */
+export type AjaxDirection = 'upload' | 'download';
+
+export type ProgressEventType = 'loadstart' | 'progress' | 'load';
+
+export type AjaxResponseType = `${AjaxDirection}_${ProgressEventType}`;
+
+/**
+ * The object containing values RxJS used to make the HTTP request.
+ *
+ * This is provided in {@link AjaxError} instances as the `request`
+ * object.
+ */
+export interface AjaxRequest {
+  /**
+   * The URL requested.
+   */
+  url: string;
+
+  /**
+   * The body to send over the HTTP request.
+   */
+  body?: any;
+
+  /**
+   * The HTTP method used to make the HTTP request.
+   */
+  method: string;
+
+  /**
+   * Whether or not the request was made asynchronously.
+   */
+  async: boolean;
+
+  /**
+   * The headers sent over the HTTP request.
+   */
+  headers: Readonly<Record<string, any>>;
+
+  /**
+   * The timeout value used for the HTTP request.
+   * Note: this is only honored if the request is asynchronous (`async` is `true`).
+   */
+  timeout: number;
+
+  /**
+   * The user credentials user name sent with the HTTP request.
+   */
+  user?: string;
+
+  /**
+   * The user credentials password sent with the HTTP request.
+   */
+  password?: string;
+
+  /**
+   * Whether or not the request was a CORS request.
+   */
+  crossDomain: boolean;
+
+  /**
+   * Whether or not a CORS request was sent with credentials.
+   * If `false`, will also ignore cookies in the CORS response.
+   */
+  withCredentials: boolean;
+
+  /**
+   * The [`responseType`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType) set before sending the request.
+   */
+  responseType: XMLHttpRequestResponseType;
+}
+
+/**
+ * Configuration for the {@link ajax} creation function

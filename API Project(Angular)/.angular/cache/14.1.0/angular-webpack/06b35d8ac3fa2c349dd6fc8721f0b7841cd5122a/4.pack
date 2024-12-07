@@ -1,0 +1,230 @@
+ new Error('A task can only be run in the zone of creation! (Creation: ' +
+                        (task.zone || NO_ZONE).name + '; Execution: ' + this.name + ')');
+                }
+                // https://github.com/angular/zone.js/issues/778, sometimes eventTask
+                // will run in notScheduled(canceled) state, we should not try to
+                // run such kind of task but just return
+                if (task.state === notScheduled && (task.type === eventTask || task.type === macroTask)) {
+                    return;
+                }
+                var reEntryGuard = task.state != running;
+                reEntryGuard && task._transitionTo(running, scheduled);
+                task.runCount++;
+                var previousTask = _currentTask;
+                _currentTask = task;
+                _currentZoneFrame = { parent: _currentZoneFrame, zone: this };
+                try {
+                    if (task.type == macroTask && task.data && !task.data.isPeriodic) {
+                        task.cancelFn = undefined;
+                    }
+                    try {
+                        return this._zoneDelegate.invokeTask(this, task, applyThis, applyArgs);
+                    }
+                    catch (error) {
+                        if (this._zoneDelegate.handleError(this, error)) {
+                            throw error;
+                        }
+                    }
+                }
+                finally {
+                    // if the task's state is notScheduled or unknown, then it has already been cancelled
+                    // we should not reset the state to scheduled
+                    if (task.state !== notScheduled && task.state !== unknown) {
+                        if (task.type == eventTask || (task.data && task.data.isPeriodic)) {
+                            reEntryGuard && task._transitionTo(scheduled, running);
+                        }
+                        else {
+                            task.runCount = 0;
+                            this._updateTaskCount(task, -1);
+                            reEntryGuard &&
+                                task._transitionTo(notScheduled, running, notScheduled);
+                        }
+                    }
+                    _currentZoneFrame = _currentZoneFrame.parent;
+                    _currentTask = previousTask;
+                }
+            };
+            Zone.prototype.scheduleTask = function (task) {
+                if (task.zone && task.zone !== this) {
+                    // check if the task was rescheduled, the newZone
+                    // should not be the children of the original zone
+                    var newZone = this;
+                    while (newZone) {
+                        if (newZone === task.zone) {
+                            throw Error("can not reschedule task to ".concat(this.name, " which is descendants of the original zone ").concat(task.zone.name));
+                        }
+                        newZone = newZone.parent;
+                    }
+                }
+                task._transitionTo(scheduling, notScheduled);
+                var zoneDelegates = [];
+                task._zoneDelegates = zoneDelegates;
+                task._zone = this;
+                try {
+                    task = this._zoneDelegate.scheduleTask(this, task);
+                }
+                catch (err) {
+                    // should set task's state to unknown when scheduleTask throw error
+                    // because the err may from reschedule, so the fromState maybe notScheduled
+                    task._transitionTo(unknown, scheduling, notScheduled);
+                    // TODO: @JiaLiPassion, should we check the result from handleError?
+                    this._zoneDelegate.handleError(this, err);
+                    throw err;
+                }
+                if (task._zoneDelegates === zoneDelegates) {
+                    // we have to check because internally the delegate can reschedule the task.
+                    this._updateTaskCount(task, 1);
+                }
+                if (task.state == scheduling) {
+                    task._transitionTo(scheduled, scheduling);
+                }
+                return task;
+            };
+            Zone.prototype.scheduleMicroTask = function (source, callback, data, customSchedule) {
+                return this.scheduleTask(new ZoneTask(microTask, source, callback, data, customSchedule, undefined));
+            };
+            Zone.prototype.scheduleMacroTask = function (source, callback, data, customSchedule, customCancel) {
+                return this.scheduleTask(new ZoneTask(macroTask, source, callback, data, customSchedule, customCancel));
+            };
+            Zone.prototype.scheduleEventTask = function (source, callback, data, customSchedule, customCancel) {
+                return this.scheduleTask(new ZoneTask(eventTask, source, callback, data, customSchedule, customCancel));
+            };
+            Zone.prototype.cancelTask = function (task) {
+                if (task.zone != this)
+                    throw new Error('A task can only be cancelled in the zone of creation! (Creation: ' +
+                        (task.zone || NO_ZONE).name + '; Execution: ' + this.name + ')');
+                task._transitionTo(canceling, scheduled, running);
+                try {
+                    this._zoneDelegate.cancelTask(this, task);
+                }
+                catch (err) {
+                    // if error occurs when cancelTask, transit the state to unknown
+                    task._transitionTo(unknown, canceling);
+                    this._zoneDelegate.handleError(this, err);
+                    throw err;
+                }
+                this._updateTaskCount(task, -1);
+                task._transitionTo(notScheduled, canceling);
+                task.runCount = 0;
+                return task;
+            };
+            Zone.prototype._updateTaskCount = function (task, count) {
+                var zoneDelegates = task._zoneDelegates;
+                if (count == -1) {
+                    task._zoneDelegates = null;
+                }
+                for (var i = 0; i < zoneDelegates.length; i++) {
+                    zoneDelegates[i]._updateTaskCount(task.type, count);
+                }
+            };
+            return Zone;
+        }());
+        // tslint:disable-next-line:require-internal-with-underscore
+        Zone.__symbol__ = __symbol__;
+        var DELEGATE_ZS = {
+            name: '',
+            onHasTask: function (delegate, _, target, hasTaskState) { return delegate.hasTask(target, hasTaskState); },
+            onScheduleTask: function (delegate, _, target, task) { return delegate.scheduleTask(target, task); },
+            onInvokeTask: function (delegate, _, target, task, applyThis, applyArgs) { return delegate.invokeTask(target, task, applyThis, applyArgs); },
+            onCancelTask: function (delegate, _, target, task) { return delegate.cancelTask(target, task); }
+        };
+        var _ZoneDelegate = /** @class */ (function () {
+            function _ZoneDelegate(zone, parentDelegate, zoneSpec) {
+                this._taskCounts = { 'microTask': 0, 'macroTask': 0, 'eventTask': 0 };
+                this.zone = zone;
+                this._parentDelegate = parentDelegate;
+                this._forkZS = zoneSpec && (zoneSpec && zoneSpec.onFork ? zoneSpec : parentDelegate._forkZS);
+                this._forkDlgt = zoneSpec && (zoneSpec.onFork ? parentDelegate : parentDelegate._forkDlgt);
+                this._forkCurrZone =
+                    zoneSpec && (zoneSpec.onFork ? this.zone : parentDelegate._forkCurrZone);
+                this._interceptZS =
+                    zoneSpec && (zoneSpec.onIntercept ? zoneSpec : parentDelegate._interceptZS);
+                this._interceptDlgt =
+                    zoneSpec && (zoneSpec.onIntercept ? parentDelegate : parentDelegate._interceptDlgt);
+                this._interceptCurrZone =
+                    zoneSpec && (zoneSpec.onIntercept ? this.zone : parentDelegate._interceptCurrZone);
+                this._invokeZS = zoneSpec && (zoneSpec.onInvoke ? zoneSpec : parentDelegate._invokeZS);
+                this._invokeDlgt =
+                    zoneSpec && (zoneSpec.onInvoke ? parentDelegate : parentDelegate._invokeDlgt);
+                this._invokeCurrZone =
+                    zoneSpec && (zoneSpec.onInvoke ? this.zone : parentDelegate._invokeCurrZone);
+                this._handleErrorZS =
+                    zoneSpec && (zoneSpec.onHandleError ? zoneSpec : parentDelegate._handleErrorZS);
+                this._handleErrorDlgt =
+                    zoneSpec && (zoneSpec.onHandleError ? parentDelegate : parentDelegate._handleErrorDlgt);
+                this._handleErrorCurrZone =
+                    zoneSpec && (zoneSpec.onHandleError ? this.zone : parentDelegate._handleErrorCurrZone);
+                this._scheduleTaskZS =
+                    zoneSpec && (zoneSpec.onScheduleTask ? zoneSpec : parentDelegate._scheduleTaskZS);
+                this._scheduleTaskDlgt = zoneSpec &&
+                    (zoneSpec.onScheduleTask ? parentDelegate : parentDelegate._scheduleTaskDlgt);
+                this._scheduleTaskCurrZone =
+                    zoneSpec && (zoneSpec.onScheduleTask ? this.zone : parentDelegate._scheduleTaskCurrZone);
+                this._invokeTaskZS =
+                    zoneSpec && (zoneSpec.onInvokeTask ? zoneSpec : parentDelegate._invokeTaskZS);
+                this._invokeTaskDlgt =
+                    zoneSpec && (zoneSpec.onInvokeTask ? parentDelegate : parentDelegate._invokeTaskDlgt);
+                this._invokeTaskCurrZone =
+                    zoneSpec && (zoneSpec.onInvokeTask ? this.zone : parentDelegate._invokeTaskCurrZone);
+                this._cancelTaskZS =
+                    zoneSpec && (zoneSpec.onCancelTask ? zoneSpec : parentDelegate._cancelTaskZS);
+                this._cancelTaskDlgt =
+                    zoneSpec && (zoneSpec.onCancelTask ? parentDelegate : parentDelegate._cancelTaskDlgt);
+                this._cancelTaskCurrZone =
+                    zoneSpec && (zoneSpec.onCancelTask ? this.zone : parentDelegate._cancelTaskCurrZone);
+                this._hasTaskZS = null;
+                this._hasTaskDlgt = null;
+                this._hasTaskDlgtOwner = null;
+                this._hasTaskCurrZone = null;
+                var zoneSpecHasTask = zoneSpec && zoneSpec.onHasTask;
+                var parentHasTask = parentDelegate && parentDelegate._hasTaskZS;
+                if (zoneSpecHasTask || parentHasTask) {
+                    // If we need to report hasTask, than this ZS needs to do ref counting on tasks. In such
+                    // a case all task related interceptors must go through this ZD. We can't short circuit it.
+                    this._hasTaskZS = zoneSpecHasTask ? zoneSpec : DELEGATE_ZS;
+                    this._hasTaskDlgt = parentDelegate;
+                    this._hasTaskDlgtOwner = this;
+                    this._hasTaskCurrZone = zone;
+                    if (!zoneSpec.onScheduleTask) {
+                        this._scheduleTaskZS = DELEGATE_ZS;
+                        this._scheduleTaskDlgt = parentDelegate;
+                        this._scheduleTaskCurrZone = this.zone;
+                    }
+                    if (!zoneSpec.onInvokeTask) {
+                        this._invokeTaskZS = DELEGATE_ZS;
+                        this._invokeTaskDlgt = parentDelegate;
+                        this._invokeTaskCurrZone = this.zone;
+                    }
+                    if (!zoneSpec.onCancelTask) {
+                        this._cancelTaskZS = DELEGATE_ZS;
+                        this._cancelTaskDlgt = parentDelegate;
+                        this._cancelTaskCurrZone = this.zone;
+                    }
+                }
+            }
+            _ZoneDelegate.prototype.fork = function (targetZone, zoneSpec) {
+                return this._forkZS ? this._forkZS.onFork(this._forkDlgt, this.zone, targetZone, zoneSpec) :
+                    new Zone(targetZone, zoneSpec);
+            };
+            _ZoneDelegate.prototype.intercept = function (targetZone, callback, source) {
+                return this._interceptZS ?
+                    this._interceptZS.onIntercept(this._interceptDlgt, this._interceptCurrZone, targetZone, callback, source) :
+                    callback;
+            };
+            _ZoneDelegate.prototype.invoke = function (targetZone, callback, applyThis, applyArgs, source) {
+                return this._invokeZS ? this._invokeZS.onInvoke(this._invokeDlgt, this._invokeCurrZone, targetZone, callback, applyThis, applyArgs, source) :
+                    callback.apply(applyThis, applyArgs);
+            };
+            _ZoneDelegate.prototype.handleError = function (targetZone, error) {
+                return this._handleErrorZS ?
+                    this._handleErrorZS.onHandleError(this._handleErrorDlgt, this._handleErrorCurrZone, targetZone, error) :
+                    true;
+            };
+            _ZoneDelegate.prototype.scheduleTask = function (targetZone, task) {
+                var returnTask = task;
+                if (this._scheduleTaskZS) {
+                    if (this._hasTaskZS) {
+                        returnTask._zoneDelegates.push(this._hasTaskDlgtOwner);
+                    }
+                    // clang-format off
+                    returnTask = this._scheduleTaskZS.onScheduleTask(this._scheduleTaskDlgt, this._scheduleTaskCurrZone, targetZ

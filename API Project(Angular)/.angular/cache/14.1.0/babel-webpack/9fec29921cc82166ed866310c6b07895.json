@@ -1,0 +1,41 @@
+  password?: string;
+
+  /**
+   * Whether or not to send the HTTP request as a CORS request.
+   * Defaults to `false`.
+   *
+   * @deprecated Will be removed in version 8. Cross domain requests and what creates a cross
+   * domain request, are dictated by the browser, and a boolean that forces it to be cross domain
+   * does not make sense. If you need to force cross domain, make sure you're making a secure request,
+   * then add a custom header to the request or use `withCredentials`. For more information on what
+   * triggers a cross domain request, see the [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials).
+   * In particular, the section on [Simple Requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests) is useful
+   * for understanding when CORS will not be used.
+   */
+  crossDomain?: boolean;
+
+  /**
+   * To send user credentials in a CORS request, set to `true`. To exclude user credentials from
+   * a CORS request, _OR_ when cookies are to be ignored by the CORS response, set to `false`.
+   *
+   * Defaults to `false`.
+   */
+  withCredentials?: boolean;
+
+  /**
+   * The name of your site's XSRF cookie.
+   */
+  xsrfCookieName?: string;
+
+  /**
+   * The name of a custom header that you can use to send your XSRF cookie.
+   */
+  xsrfHeaderName?: string;
+
+  /**
+   * Can be set to change the response type.
+   * Valid values are `"arraybuffer"`, `"blob"`, `"document"`, `"json"`, and `"text"`.
+   * Note that the type of `"document"` (such as an XML document) is ignored if the global context is
+   * not `Window`.
+   *
+   * Defau

@@ -1,0 +1,21 @@
+import { COLUMN, SOURCES_INDEX, SOURCE_LINE, SOURCE_COLUMN } from './sourcemap-segment';
+import { memoizedBinarySearch, upperBound } from './binary-search';
+
+import type { ReverseSegment, SourceMapSegment } from './sourcemap-segment';
+import type { MemoState } from './binary-search';
+
+export type Source = {
+  __proto__: null;
+  [line: number]: Exclude<ReverseSegment, [number]>[];
+};
+
+// Rebuilds the original source files, with mappings that are ordered by source line/column instead
+// of generated line/column.
+export default function buildBySources(
+  decoded: readonly SourceMapSegment[][],
+  memos: MemoState[],
+): Source[] {
+  const sources: Source[] = memos.map(buildNullArray);
+
+  for (let i = 0; i < decoded.length; i++) {
+    const l

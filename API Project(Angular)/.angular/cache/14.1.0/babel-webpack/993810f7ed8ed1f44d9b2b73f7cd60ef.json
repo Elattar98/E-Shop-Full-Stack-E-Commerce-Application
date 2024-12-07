@@ -1,0 +1,13 @@
+sSubscriber_1 = init.progressSubscriber, _c = init.includeDownloadProgress, includeDownloadProgress = _c === void 0 ? false : _c, _d = init.includeUploadProgress, includeUploadProgress = _d === void 0 ? false : _d;
+            var addErrorEvent = function (type, errorFactory) {
+                xhr.addEventListener(type, function () {
+                    var _a;
+                    var error = errorFactory();
+                    (_a = progressSubscriber_1 === null || progressSubscriber_1 === void 0 ? void 0 : progressSubscriber_1.error) === null || _a === void 0 ? void 0 : _a.call(progressSubscriber_1, error);
+                    destination.error(error);
+                });
+            };
+            addErrorEvent('timeout', function () { return new AjaxTimeoutError(xhr, _request); });
+            addErrorEvent('abort', function () { return new AjaxError('aborted', xhr, _request); });
+            var createResponse_1 = function (direction, event) {
+                return new AjaxRes

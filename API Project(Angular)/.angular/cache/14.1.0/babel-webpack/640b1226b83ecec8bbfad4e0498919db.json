@@ -1,0 +1,24 @@
+is closing is caused by some error.
+ * ```
+ *
+ * Multiplexing WebSocket
+ *
+ * ```ts
+ * import { webSocket } from 'rxjs/webSocket';
+ *
+ * const subject = webSocket('ws://localhost:8081');
+ *
+ * const observableA = subject.multiplex(
+ *   () => ({ subscribe: 'A' }), // When server gets this message, it will start sending messages for 'A'...
+ *   () => ({ unsubscribe: 'A' }), // ...and when gets this one, it will stop.
+ *   message => message.type === 'A' // If the function returns `true` message is passed down the stream. Skipped if the function returns false.
+ * );
+ *
+ * const observableB = subject.multiplex( // And the same goes for 'B'.
+ *   () => ({ subscribe: 'B' }),
+ *   () => ({ unsubscribe: 'B' }),
+ *   message => message.type === 'B'
+ * );
+ *
+ * const subA = observableA.subscribe(messageForA => console.log(messageForA));
+ * // At this moment WebSocket connection is established. Server gets '{"subscribe": "A"}' message and starts sending

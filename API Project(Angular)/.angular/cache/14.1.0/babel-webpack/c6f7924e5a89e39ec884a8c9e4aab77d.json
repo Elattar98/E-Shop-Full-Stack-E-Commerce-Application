@@ -1,0 +1,37 @@
+hr.withCredentials = _request.withCredentials;
+        }
+        for (var key in headers) {
+            if (headers.hasOwnProperty(key)) {
+                xhr.setRequestHeader(key, headers[key]);
+            }
+        }
+        if (body) {
+            xhr.send(body);
+        }
+        else {
+            xhr.send();
+        }
+        return function () {
+            if (xhr && xhr.readyState !== 4) {
+                xhr.abort();
+            }
+        };
+    });
+}
+function extractContentTypeAndMaybeSerializeBody(body, headers) {
+    var _a;
+    if (!body ||
+        typeof body === 'string' ||
+        isFormData(body) ||
+        isURLSearchParams(body) ||
+        isArrayBuffer(body) ||
+        isFile(body) ||
+        isBlob(body) ||
+        isReadableStream(body)) {
+        return body;
+    }
+    if (isArrayBufferView(body)) {
+        return body.buffer;
+    }
+    if (typeof body === 'object') {
+        headers['content-type'] = (_a = headers['content-type']) !== null && _a !== void 0 

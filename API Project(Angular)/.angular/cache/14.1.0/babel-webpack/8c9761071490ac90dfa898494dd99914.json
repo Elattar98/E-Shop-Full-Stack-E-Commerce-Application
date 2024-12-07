@@ -1,0 +1,25 @@
+import { Observable } from '../Observable';
+import { AjaxConfig } from './types';
+import { AjaxResponse } from './AjaxResponse';
+export interface AjaxCreationMethod {
+    /**
+     * Creates an observable that will perform an AJAX request using the
+     * [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) in
+     * global scope by default.
+     *
+     * This is the most configurable option, and the basis for all other AJAX calls in the library.
+     *
+     * ## Example
+     *
+     * ```ts
+     * import { ajax } from 'rxjs/ajax';
+     * import { map, catchError, of } from 'rxjs';
+     *
+     * const obs$ = ajax({
+     *   method: 'GET',
+     *   url: 'https://api.github.com/users?per_page=5',
+     *   responseType: 'json'
+     * }).pipe(
+     *   map(userResponse => console.log('users: ', userResponse)),
+     *   catchError(error => {
+     *     console.log('error: ', erro

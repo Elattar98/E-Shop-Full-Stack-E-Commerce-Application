@@ -1,0 +1,66 @@
+)
+ * .subscribe({
+ *   next: console.log,
+ *   error: console.error
+ * });
+ * ```
+ *
+ * Emit a {@link TimeoutError} if the source waits longer than 5 seconds between any two values or the first value
+ * and subscription.
+ *
+ * ```ts
+ * import { timer, timeout, expand } from 'rxjs';
+ *
+ * const getRandomTime = () => Math.round(Math.random() * 10_000);
+ *
+ * // An observable that waits a random amount of time between each delivered value
+ * const source$ = timer(getRandomTime())
+ *   .pipe(expand(() => timer(getRandomTime())));
+ *
+ * source$
+ *   .pipe(timeout({ each: 5_000 }))
+ *   .subscribe({
+ *     next: console.log,
+ *     error: console.error
+ *   });
+ * ```
+ *
+ * Emit a {@link TimeoutError} if the source does not emit before 7 seconds, _or_ if the source waits longer than
+ * 5 seconds between any two values after the first.
+ *
+ * ```ts
+ * import { timer, timeout, expand } from 'rxjs';
+ *
+ * const getRandomTime = () => Math.round(Math.random() * 10_000);
+ *
+ * // An observable that waits a random amount of time between each delivered value
+ * const source$ = timer(getRandomTime())
+ *   .pipe(expand(() => timer(getRandomTime())));
+ *
+ * source$
+ *   .pipe(timeout({ first: 7_000, each: 5_000 }))
+ *   .subscribe({
+ *     next: console.log,
+ *     error: console.error
+ *   });
+ * ```
+ */
+export declare function timeout<T, M = unknown>(config: Omit<TimeoutConfig<T, any, M>, 'with'>): OperatorFunction<T, T>;
+/**
+ * Returns an observable that will error if the source does not push its first value before the specified time passed as a `Date`.
+ * This is functionally the same as `timeout({ first: someDate })`.
+ *
+ * <span class="informal">Errors if the first value doesn't show up before the given date and time</span>
+ *
+ * ![](timeout.png)
+ *
+ * @param first The date to at which the resulting observable will timeout if the source observable
+ * does not emit at least one value.
+ * @param scheduler The scheduler to use. Defaults to {@link asyncScheduler}.
+ */
+export declare function timeout<T>(first: Date, scheduler?: SchedulerLike): MonoTypeOperatorFunction<T>;
+/**
+ * Returns an observable that will error if the source does not push a value within the specified time in milliseconds.
+ * This is functionally the same as `timeout({ each: milliseconds })`.
+ *
+ * <span class="informal

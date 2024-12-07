@@ -1,0 +1,24 @@
+<div class="card">
+        <img src={{product.productImage}} class="card-img-top" alt=""
+        (mouseover) = "show=true" (mouseout) = "show=false">
+                <div *ngIf="show" class="mx-3 my-1">
+                        <span class="card-text">Rate: {{product.productRating.rate}}</span>
+                        <br/>
+                        <span class="card-text">Count: {{product.productRating.count}}</span>
+                        <br/>
+                        <span class="card-text">Price: {{product.productPrice}}</span>
+                </div>
+
+        <div class="card-body d-grid gap-2">
+                        <a href="#" [routerLink]="['/details', product.productId]">
+                                <h5 class="card-title">{{product.productTitle}}</h5>
+                                <p class="card-text">{{product.productDescription|Shorten}}</p>
+                        </a>
+                        <button class="btn btn-primary"
+                        (click)= "onAddToCart()"  >Add to cart</button>
+                        <button class="btn btn-primary"
+                          [routerLink]= "['/editproduct', product.productId]">Edit Product</button>
+                        <button class="btn btn-danger"
+                         (click)= "onDeleteProduct()">Delete Product</button>
+        </div>
+</div>

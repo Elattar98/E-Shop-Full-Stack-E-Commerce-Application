@@ -1,0 +1,18 @@
+eateNodeAndAppend(create, ICU_MARKER, ngDevMode ? `nested ICU ${nestedIcuIndex}` : '', parentIdx, newIndex);
+                    icuStart(tView, lView, sharedUpdateOpCodes, parentIdx, icuExpression, newIndex);
+                    addRemoveNestedIcu(remove, newIndex, depth);
+                }
+                break;
+        }
+        currentNode = currentNode.nextSibling;
+    }
+    return bindingMask;
+}
+function addRemoveNode(remove, index, depth) {
+    if (depth === 0) {
+        remove.push(index);
+    }
+}
+function addRemoveNestedIcu(remove, index, depth) {
+    if (depth === 0) {
+        remove.push(~index); // remove 

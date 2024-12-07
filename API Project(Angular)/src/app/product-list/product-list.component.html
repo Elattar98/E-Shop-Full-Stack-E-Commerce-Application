@@ -1,0 +1,30 @@
+
+
+  <div class="card-header mt-5">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true" (click) = "onAll()">All</button>
+      </li>
+      <li class="nav-item"
+      *ngFor="let item of loadedCategories">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false" (click)= "onCategory(item.categoryId)">{{item.categoryName}}</button>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="tab-content text-center m-4" id="myTabContent">
+    <div class="row row-cols-auto tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <app-product class= "col-md-4"
+            *ngFor = "let prod of loadedProducts"
+            [product] = "prod">
+        </app-product>
+    </div>
+
+  <div class="row row-cols-auto" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <app-product class="col-md-2 card-group mb-2"
+          *ngFor = "let prod of loadedProducts"
+          [product] = "prod">
+      </app-product>
+  </div>
+</div>

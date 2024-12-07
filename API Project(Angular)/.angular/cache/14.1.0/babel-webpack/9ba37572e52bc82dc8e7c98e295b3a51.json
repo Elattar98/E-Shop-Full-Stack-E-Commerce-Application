@@ -1,0 +1,33 @@
+import { Observable } from './Observable';
+import { Subscription, EMPTY_SUBSCRIPTION } from './Subscription';
+import { ObjectUnsubscribedError } from './util/ObjectUnsubscribedError';
+import { arrRemove } from './util/arrRemove';
+import { errorContext } from './util/errorContext';
+export class Subject extends Observable {
+    constructor() {
+        super();
+        this.closed = false;
+        this.currentObservers = null;
+        this.observers = [];
+        this.isStopped = false;
+        this.hasError = false;
+        this.thrownError = null;
+    }
+    lift(operator) {
+        const subject = new AnonymousSubject(this, this);
+        subject.operator = operator;
+        return subject;
+    }
+    _throwIfClosed() {
+        if (this.closed) {
+            throw new ObjectUnsubscribedError();
+        }
+    }
+    next(value) {
+        errorContext(() => {
+            this._throwIfClosed();
+            if (!this.isStopped) {
+                if (!this.currentObservers) {
+                    this.currentObservers = Array.from(this.observers);
+                }
+ 
