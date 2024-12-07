@@ -39,13 +39,6 @@ dotnet restore
 # Run the application
 npm start  
 dotnet run  
-Contact
-Author: Abd Elrahman Elattar
-📧 Email: abdelrahmanelattar79@gmail.com
-🔗 GitHub Profile
-
-yaml
-Copy code
 ```
 ---
 
@@ -62,9 +55,9 @@ Copy code
 ---
 
 ### Contact
-Author: Abd Elrahman Elattar
-📧 Email: abdelrahmanelattar79@gmail.com
-🔗 GitHub Profile | LinkedIn Profile
+#### Author: Abd Elrahman Elattar
+- 📧 Email: abdelrahmanelattar79@gmail.com
+- 🔗 GitHub Profile | LinkedIn Profile
 
 
 
